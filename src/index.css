@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   RETRO THEME - Global Styles
+   ============================================ */
+
+/* Pixelated text rendering for retro feel */
+* {
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  font-smooth: never;
+  -webkit-font-smooth: never;
+}
+
+body {
+  font-family: 'VT323', 'Courier New', monospace;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Custom scrollbar for window content */
+.window-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.window-scrollbar::-webkit-scrollbar-track {
+  background: #8b7355;
+  border: 2px solid;
+  border-color: #6b5d47 #f5f0e8 #f5f0e8 #6b5d47;
+}
+
+.window-scrollbar::-webkit-scrollbar-thumb {
+  background: #d4c5a9;
+  border: 2px solid;
+  border-color: #f5f0e8 #6b5d47 #6b5d47 #f5f0e8;
+  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.2), inset -2px -2px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Retro button shine effect */
+.retro-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.retro-btn:hover::before {
+  left: 100%;
+}
+
+/* Window title bar highlight line */
+.titlebar-highlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Desktop background with fallback pattern */
+.desktop-bg {
+  background:
+    linear-gradient(rgba(139, 115, 85, 0.4), rgba(139, 115, 85, 0.4)),
+    url('/images/background.jpg');
+  background-image:
+    linear-gradient(rgba(139, 115, 85, 0.4), rgba(139, 115, 85, 0.4)),
+    url('/images/background.jpg'),
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%23d4c5a9" width="100" height="100"/><circle cx="50" cy="50" r="30" fill="%23c4b599" opacity="0.3"/></svg>');
+  background-size: cover, cover, 200px 200px;
+  background-position: center center, center center, 0 0;
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-attachment: fixed;
+}
+
+/* Window open animation */
+@keyframes windowOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-window-open {
+  animation: windowOpen 0.3s ease-out;
+}
+
+/* Stats section divider lines */
+.stats-divider {
+  position: relative;
+}
+
+.stats-divider::before,
+.stats-divider::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #6b5d47;
+}
+
+.stats-divider::before {
+  top: -1px;
+}
+
+.stats-divider::after {
+  bottom: -1px;
+}
+
+/* Stat item vertical divider */
+.stat-divider::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #6b5d47;
+}
