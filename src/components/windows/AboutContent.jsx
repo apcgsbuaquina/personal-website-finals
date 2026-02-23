@@ -6,7 +6,7 @@ export default function AboutContent() {
       </h2>
       <div className="my-4">
         <img
-          src="public/images/gallery/pfp.png"
+          src="/images/gallery/pfp.png"
           alt="About me"
           className="w-20 h-20 md:w-[120px] md:h-[120px] border-2 border-retro-border-dark float-left mr-4 mb-2.5 object-cover shadow-retro-inset bg-[#1a1a1a]"
         />
