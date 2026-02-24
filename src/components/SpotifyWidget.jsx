@@ -28,7 +28,7 @@ export default function SpotifyWidget() {
         const data = await res.json()
         if (!cancelled) {
           setTracks(data.tracks || [])
-          setError(null)
+          setError(data.rateLimited ? 'Rate limited' : null)
         }
       } catch (err) {
         if (!cancelled) setError(err.message)
@@ -38,8 +38,8 @@ export default function SpotifyWidget() {
     }
 
     fetchTracks()
-    // Refresh every 2 minutes
-    const interval = setInterval(fetchTracks, 120_000)
+    // Refresh every 10 minutes
+    const interval = setInterval(fetchTracks, 600_000)
     return () => {
       cancelled = true
       clearInterval(interval)
@@ -79,9 +79,15 @@ export default function SpotifyWidget() {
             </div>
           )}
 
-          {error && (
+          {error && error !== 'Rate limited' && (
             <div className="p-3 text-center text-retro-dark font-retro text-sm">
               <span className="text-red-700">⚠</span> Could not load tracks
+            </div>
+          )}
+
+          {error === 'Rate limited' && (
+            <div className="p-3 text-center text-retro-dark font-retro text-sm">
+              Spotify is rate limited right now — showing last available data.
             </div>
           )}
 

@@ -9,6 +9,11 @@ const TOKEN_URL = 'https://accounts.spotify.com/api/token'
 const RECENTLY_PLAYED_URL =
   'https://api.spotify.com/v1/me/player/recently-played?limit=5'
 
+let cachedResponse = null
+let cacheExpiry = 0
+let rateLimitedUntil = 0
+const CACHE_DURATION_MS = 10 * 60 * 1000
+
 async function getAccessToken() {
   const basic = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64')
 
@@ -37,7 +42,7 @@ export default async function handler(req, res) {
   // CORS headers for local dev
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET')
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=30')
+  res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
 
   try {
     // Verify env vars are set
@@ -53,6 +58,17 @@ export default async function handler(req, res) {
       })
     }
 
+    if (cachedResponse && Date.now() < cacheExpiry) {
+      return res.status(200).json(cachedResponse)
+    }
+
+    if (Date.now() < rateLimitedUntil) {
+      if (cachedResponse) {
+        return res.status(200).json(cachedResponse)
+      }
+      return res.status(200).json({ tracks: [], rateLimited: true })
+    }
+
     const { access_token } = await getAccessToken()
 
     const spotifyRes = await fetch(RECENTLY_PLAYED_URL, {
@@ -60,6 +76,15 @@ export default async function handler(req, res) {
     })
 
     if (!spotifyRes.ok) {
+      if (spotifyRes.status === 429) {
+        const retryAfter = Number.parseInt(spotifyRes.headers.get('Retry-After') || '60', 10)
+        rateLimitedUntil = Date.now() + Math.max(retryAfter, 60) * 1000
+        if (cachedResponse) {
+          return res.status(200).json(cachedResponse)
+        }
+        return res.status(200).json({ tracks: [], rateLimited: true, retryAfter })
+      }
+
       return res.status(spotifyRes.status).json({
         error: 'Spotify API error',
         status: spotifyRes.status,
@@ -77,7 +102,9 @@ export default async function handler(req, res) {
       playedAt: item.played_at,
     }))
 
-    return res.status(200).json({ tracks })
+    cachedResponse = { tracks }
+    cacheExpiry = Date.now() + CACHE_DURATION_MS
+    return res.status(200).json(cachedResponse)
   } catch (err) {
     console.error('Spotify API error:', err.message, err.stack)
     return res.status(500).json({ 
